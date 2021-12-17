@@ -32,7 +32,7 @@ Usage with Makefiles, Visual Studio, etc. (see `cmake --help` for a complete lis
   2. `cd` to `build`
   3. Unix: run `cmake -G "Unix Makefiles" ..`
   3. Windows: run `cmake -G "Visual Studio 10" ..`
-  
+
 You can switch between build modes by specifying:
 
   - `-DCMAKE_BUILD_TYPE=Debug` or
@@ -49,3 +49,40 @@ To profile the code (very useful to optimize the code):
   1. Install Valgrind
   2. Run `valgrind --tool=callgrind build/zxing - path/to/test/data/*.jpg > report.html`
   3. Analyze output using KCachegrind
+
+
+
+# Wrapper zxing
+再封装了一层供c程序调用, 使用scons后生成build目录，在build目录下，新建 `main.c`文件，`libzxing.so`需要再放入`build`下:
+
+```c
+#include "../cli/src/my_zxing_wrapper.h"
+#include <stdio.h>
+#include <malloc.h>
+int main(int argc, char* argv[])
+{
+    const char* filename="/home/lvguidong/testqr/20.jpg";
+    char databuff[1024] = {0};
+    int ret = get_qrcode_wrapper(filename, databuff);
+    printf("data:%s\n", databuff);
+
+    return 0;
+}
+```
+
+目录结构是：
+
+```shell
+ls
+build  cli  core  libzxinglvguidong.so  main  main.c  SConscript
+ |--libzing.so
+```
+
+编译-执行：
+
+```
+gcc main.c -L. -lzxinglvguidong  -o main
+./main
+this is test qrcode!
+```
+
